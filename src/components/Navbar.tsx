@@ -1,0 +1,86 @@
+"use client";
+
+import { useState } from "react";
+import { Menu, X, Phone } from "lucide-react";
+
+export default function Navbar() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <nav className="fixed w-full bg-white/90 backdrop-blur-md z-50 shadow-sm transition-all duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-20 items-center">
+          {/* Logo */}
+          <div className="flex-shrink-0 flex items-center">
+            <a href="#" className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-primary-600">Dental</span>
+              <span className="text-2xl font-light text-secondary-800">Lanz</span>
+            </a>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#servicios" className="text-secondary-800 hover:text-primary-600 transition-colors">Servicios</a>
+            <a href="#opiniones" className="text-secondary-800 hover:text-primary-600 transition-colors">Opiniones</a>
+            <a href="#contacto" className="text-secondary-800 hover:text-primary-600 transition-colors">Contacto</a>
+            <a 
+              href="tel:+525558019251" 
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+            >
+              <Phone className="w-4 h-4" />
+              55 5801 9251
+            </a>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-secondary-800 hover:text-primary-600 focus:outline-none"
+            >
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full">
+          <div className="px-4 pt-2 pb-6 space-y-1">
+            <a 
+              href="#servicios" 
+              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Servicios
+            </a>
+            <a 
+              href="#opiniones" 
+              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Opiniones
+            </a>
+            <a 
+              href="#contacto" 
+              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Contacto
+            </a>
+            <div className="pt-4 px-3">
+              <a 
+                href="tel:+525558019251" 
+                className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md"
+              >
+                <Phone className="w-5 h-5" />
+                Llamar Ahora
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+}
