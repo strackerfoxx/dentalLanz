@@ -1,8 +1,16 @@
 
-> dental-lanz@0.1.0 start
-> next start
+> dental-lanz@0.1.0 dev
+> next dev
 
-▲ Next.js 16.2.6
+▲ Next.js 16.2.6 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
-✓ Ready in 183ms
+✓ Ready in 560ms
+
+○ Compiling / ...
+ GET / 200 in 6.1s (next.js: 5.1s, application-code: 931ms)
+API URL or Business ID missing, falling back to mock data for Services.
+ GET /servicios 200 in 634ms (next.js: 497ms, application-code: 137ms)
+ GET /agendar 200 in 596ms (next.js: 498ms, application-code: 98ms)
+[browser] API URL or Business ID missing, falling back to mock data for Services. (src/lib/api.ts:36:13)
+[browser] API URL or Business ID missing, falling back to mock data for Business. (src/lib/api.ts:9:13)

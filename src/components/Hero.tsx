@@ -21,14 +21,14 @@ export default function Hero() {
               
               <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row gap-4 sm:justify-center lg:justify-start">
                 <a
-                  href="#contacto"
+                  href="/agendar"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 border border-transparent text-base font-medium rounded-xl text-white bg-primary-600 hover:bg-primary-700 md:text-lg transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
                   <Calendar className="w-5 h-5" />
                   Agendar Cita
                 </a>
                 <a
-                  href="#servicios"
+                  href="/servicios"
                   className="inline-flex items-center justify-center px-8 py-4 border-2 border-slate-200 text-base font-medium rounded-xl text-secondary-800 bg-white hover:bg-slate-50 hover:border-slate-300 md:text-lg transition-all"
                 >
                   Ver Tratamientos

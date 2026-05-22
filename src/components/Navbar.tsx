@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
+import Link from "next/link";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,16 +21,16 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#servicios" className="text-secondary-800 hover:text-primary-600 transition-colors">Servicios</a>
-            <a href="#opiniones" className="text-secondary-800 hover:text-primary-600 transition-colors">Opiniones</a>
-            <a href="#contacto" className="text-secondary-800 hover:text-primary-600 transition-colors">Contacto</a>
-            <a 
-              href="tel:+525558019251" 
+            <Link href="/servicios" className="text-secondary-800 hover:text-primary-600 transition-colors">Servicios</Link>
+            <Link href="/#opiniones" className="text-secondary-800 hover:text-primary-600 transition-colors">Opiniones</Link>
+            <Link href="/#contacto" className="text-secondary-800 hover:text-primary-600 transition-colors">Contacto</Link>
+            <Link
+              href="/agendar"
               className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
               <Phone className="w-4 h-4" />
-              55 5801 9251
-            </a>
+              Agendar Cita
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -48,35 +49,35 @@ export default function Navbar() {
       {isOpen && (
         <div className="md:hidden bg-white border-t border-slate-100 shadow-lg absolute w-full">
           <div className="px-4 pt-2 pb-6 space-y-1">
-            <a 
-              href="#servicios" 
+            <Link
+              href="/servicios"
               className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
               onClick={() => setIsOpen(false)}
             >
               Servicios
-            </a>
-            <a 
-              href="#opiniones" 
+            </Link>
+            <Link
+              href="/#opiniones"
               className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
               onClick={() => setIsOpen(false)}
             >
               Opiniones
-            </a>
-            <a 
-              href="#contacto" 
+            </Link>
+            <Link
+              href="/#contacto"
               className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
               onClick={() => setIsOpen(false)}
             >
               Contacto
-            </a>
+            </Link>
             <div className="pt-4 px-3">
-              <a 
-                href="tel:+525558019251" 
+              <Link
+                href="/agendar"
                 className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md"
               >
                 <Phone className="w-5 h-5" />
-                Llamar Ahora
-              </a>
+                Agendar Cita
+              </Link>
             </div>
           </div>
         </div>
