@@ -11,7 +11,7 @@ export default async function ServicesPage() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
 
-      <main className="flex-grow pt-24 pb-16">
+      <main className="grow pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h1 className="text-4xl font-extrabold text-secondary-900 sm:text-5xl tracking-tight">
@@ -28,7 +28,7 @@ export default async function ServicesPage() {
                 key={service.id}
                 className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col hover:shadow-md transition-shadow"
               >
-                <div className="p-6 flex-grow">
+                <div className="p-6 grow">
                   <h3 className="text-2xl font-bold text-secondary-900 mb-2">
                     {service.name}
                   </h3>

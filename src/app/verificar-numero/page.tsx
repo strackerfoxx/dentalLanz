@@ -12,7 +12,7 @@ import Footer from "@/components/Footer";
 import { Phone, KeyRound, ShieldCheck } from "lucide-react";
 
 export default function PhoneAuth() {
-  const [phone, setPhone] = useState("+525512345678");
+  const [phone, setPhone] = useState("+52");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
@@ -64,7 +64,7 @@ export default function PhoneAuth() {
       const user = result.user;
       const idToken = await user.getIdToken();
 
-      await fetch(`http://localhost:4000/api/client/confirm-client`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/confirm-client`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -88,7 +88,7 @@ export default function PhoneAuth() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
 
-      <main className="flex-grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
+      <main className="grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-600 mb-4">

@@ -30,7 +30,7 @@ export default function CrearCliente() {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:4000/api/client/self-create", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/self-create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,6 +39,7 @@ export default function CrearCliente() {
           name: formData.name,
           phone: formData.phone,
           ...(formData.email && { email: formData.email }),
+          businessId: process.env.NEXT_PUBLIC_BUSINESS_ID,
         }),
       });
 
@@ -47,7 +48,7 @@ export default function CrearCliente() {
       }
 
       // Redirigir a la pantalla de login para verificar el número
-      router.push("/login");
+      router.push("/verificar-numero");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Ocurrió un error inesperado.");
@@ -63,7 +64,7 @@ export default function CrearCliente() {
     <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
 
-      <main className="flex-grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
+      <main className="grow flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 text-primary-600 mb-4">
@@ -149,7 +150,7 @@ export default function CrearCliente() {
             <button
               type="submit"
               disabled={isLoading || !formData.name || !formData.phone}
-              className="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="cursor-pointer mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {isLoading ? "Creando..." : "Crear Cuenta"}
             </button>
