@@ -16,12 +16,7 @@ function BookingForm() {
   const router = useRouter();
   const { client, isAuthenticated, isLoading: authLoading } = useAuth();
 
-  useEffect(() => {
-    if (authLoading) return;
-    if (!client || !isAuthenticated) {
-      router.push("/login");
-    }
-  }, [client, isAuthenticated, authLoading, router]);
+
   const initialServiceId = searchParams.get("serviceId");
 
   const [services, setServices] = useState<Service[]>([]);
@@ -134,10 +129,38 @@ function BookingForm() {
     }
   };
 
-  if (loading || authLoading || !client || !isAuthenticated) {
+  if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  if (!client || !isAuthenticated) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+          <CalendarIcon className="w-16 h-16 text-primary-200 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Ingresa para Agendar</h2>
+          <p className="text-slate-600 mb-8 max-w-md mx-auto">
+            Para poder agendar una cita y ver tu historial, necesitas crear una cuenta o iniciar sesión.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => router.push("/signup")}
+              className="w-full sm:w-auto px-8 py-3 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-colors"
+            >
+              Crear Cuenta
+            </button>
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full sm:w-auto px-8 py-3 bg-white text-primary-600 border-2 border-primary-600 rounded-full font-medium hover:bg-primary-50 transition-colors"
+            >
+              Iniciar Sesión
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
