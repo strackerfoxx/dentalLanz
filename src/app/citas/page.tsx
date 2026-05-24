@@ -77,7 +77,7 @@ export default function CitasPage() {
     };
 
     fetchAppointments();
-  }, [client, isAuthenticated, authLoading, router]);
+  }, [client, isAuthenticated, authLoading, router, token]);
 
   if (authLoading || !client || !isAuthenticated) {
     return (
@@ -147,7 +147,7 @@ export default function CitasPage() {
                         </div>
                       </div>
                     </div>
-                    <div>
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
                       {appointment.status === "CONFIRMED" ? (
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 gap-1">
                           <CheckCircle2 className="w-4 h-4" /> Confirmada
@@ -161,6 +161,13 @@ export default function CitasPage() {
                           {appointment.status}
                         </span>
                       )}
+
+                      <button
+                        onClick={() => router.push(`/editar-cita/${appointment.id}`)}
+                        className="text-sm font-medium text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-3 py-1.5 rounded-lg transition-colors border border-primary-100"
+                      >
+                        Editar
+                      </button>
                     </div>
                   </div>
 

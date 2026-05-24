@@ -10,6 +10,8 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function RootLayout({
   children,
@@ -21,6 +23,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-slate-50 text-slate-900 antialiased`}>
         <AuthProvider>
           {children}
+          <ToastContainer position="bottom-right" />
         </AuthProvider>
       </body>
     </html>

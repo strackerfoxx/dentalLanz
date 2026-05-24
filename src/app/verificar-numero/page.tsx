@@ -12,6 +12,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, KeyRound, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-toastify";
 
 export default function PhoneAuth() {
   const router = useRouter();
@@ -57,10 +58,10 @@ export default function PhoneAuth() {
 
       setConfirmationResult(result);
       setStep(2);
-      alert("Código enviado");
+      toast.success("Código enviado");
     } catch (error) {
       console.error(error);
-      alert("Hubo un error al enviar el código. Intenta nuevamente.");
+      toast.error("Hubo un error al enviar el código. Intenta nuevamente.");
     } finally {
       setIsLoading(false);
     }
@@ -97,7 +98,7 @@ export default function PhoneAuth() {
       router.push("/");
     } catch (error) {
       console.error(error);
-      alert("Código incorrecto o expirado.");
+      toast.error("Código incorrecto o expirado.");
     } finally {
       setIsLoading(false);
     }
