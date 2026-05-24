@@ -12,6 +12,7 @@ interface AuthContextType {
   token: string | null;
   client: Client | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (token: string, client: Client) => void;
   logout: () => void;
 }
@@ -21,6 +22,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken] = useState<string | null>(null);
   const [client, setClient] = useState<Client | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Solo se ejecuta en el cliente
@@ -43,6 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setTimeout(() => {
       setToken(storedToken);
       setClient(parsedClient);
+      setIsLoading(false);
     }, 0);
   }, []);
 
@@ -66,7 +69,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // The client side will handle redirects once hydrated.
 
   return (
-    <AuthContext.Provider value={{ token, client, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ token, client, isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
