@@ -14,7 +14,7 @@ import { getAvailableUsers } from "@/lib/availableUsers";
 function BookingForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { client, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { token, client, isAuthenticated, isLoading: authLoading } = useAuth();
 
 
   const initialServiceId = searchParams.get("serviceId");
@@ -98,15 +98,17 @@ function BookingForm() {
         serviceId,
         userId: serviceUsers[serviceId],
       })),
-      businessClientId: client?.businessClientId
+      businessClientId: client?.businessClient
     };
+    console.log("Payload to submit:", payload);
 
     try {
       // Usar endpoint de creación de citas adaptado al cliente
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/create`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(payload)
       });

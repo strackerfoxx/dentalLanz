@@ -15,17 +15,16 @@ export default function Navbar() {
         <div className="flex justify-between h-20 items-center">
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <a href="#" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl font-bold text-primary-600">Dental</span>
               <span className="text-2xl font-light text-secondary-800">Lanz</span>
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/servicios" className="text-secondary-800 hover:text-primary-600 transition-colors">Servicios</Link>
             <Link href="/#opiniones" className="text-secondary-800 hover:text-primary-600 transition-colors">Opiniones</Link>
-            <Link href="/#contacto" className="text-secondary-800 hover:text-primary-600 transition-colors">Contacto</Link>
             {isAuthenticated && (
               <Link href="/citas" className="text-secondary-800 hover:text-primary-600 transition-colors">Mis Citas</Link>
             )}

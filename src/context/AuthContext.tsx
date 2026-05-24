@@ -3,7 +3,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 
 export interface Client {
-  businessClientId: string;
+  businessClient: string;
   name: string;
   businessId: string;
 }

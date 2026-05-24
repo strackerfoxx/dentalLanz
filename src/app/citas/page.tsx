@@ -35,7 +35,7 @@ interface AppointmentsResponse {
 
 export default function CitasPage() {
   const router = useRouter();
-  const { client, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { token, client, isAuthenticated, isLoading: authLoading } = useAuth();
 
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,13 @@ export default function CitasPage() {
     const fetchAppointments = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/appointment/get-appointments-by-client-id?clientId=${client.businessClientId}&page=1&limit=20`
+          `${process.env.NEXT_PUBLIC_API_URL}/appointment/get-appointments-by-client-id?clientId=${client.businessClient}&page=1&limit=20`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`,
+            },
+          }
         );
 
         if (!response.ok) {
