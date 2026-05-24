@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { Menu, X, Phone } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <nav className="fixed w-full bg-white/90 backdrop-blur-md z-50 shadow-sm transition-all duration-300">
@@ -24,6 +26,9 @@ export default function Navbar() {
             <Link href="/servicios" className="text-secondary-800 hover:text-primary-600 transition-colors">Servicios</Link>
             <Link href="/#opiniones" className="text-secondary-800 hover:text-primary-600 transition-colors">Opiniones</Link>
             <Link href="/#contacto" className="text-secondary-800 hover:text-primary-600 transition-colors">Contacto</Link>
+            {isAuthenticated && (
+              <Link href="/citas" className="text-secondary-800 hover:text-primary-600 transition-colors">Mis Citas</Link>
+            )}
             <Link
               href="/agendar"
               className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
@@ -70,6 +75,15 @@ export default function Navbar() {
             >
               Contacto
             </Link>
+            {isAuthenticated && (
+              <Link
+                href="/citas"
+                className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+                onClick={() => setIsOpen(false)}
+              >
+                Mis Citas
+              </Link>
+            )}
             <div className="pt-4 px-3">
               <Link
                 href="/agendar"

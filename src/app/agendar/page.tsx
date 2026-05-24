@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getServices, getBusiness } from "@/lib/api";
@@ -12,6 +13,10 @@ import { getAvailableUsers } from "@/lib/availableUsers";
 
 function BookingForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { client, isAuthenticated, isLoading: authLoading } = useAuth();
+
+
   const initialServiceId = searchParams.get("serviceId");
 
   const [services, setServices] = useState<Service[]>([]);
@@ -26,9 +31,7 @@ function BookingForm() {
   // Available users logic
   const [serviceUsers, setServiceUsers] = useState<Record<string, string>>({});
   const [availableUsers, setAvailableUsers] = useState<Record<string, BusinessUser[]>>({});
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
+
 
   useEffect(() => {
     async function fetchData() {
@@ -95,11 +98,7 @@ function BookingForm() {
         serviceId,
         userId: serviceUsers[serviceId],
       })),
-      client: {
-        name,
-        email,
-        phone
-      }
+      businessClientId: client?.businessClientId
     };
 
     try {
@@ -116,15 +115,12 @@ function BookingForm() {
         throw new Error("Error al agendar la cita.");
       }
 
-      alert(`¡Cita agendada con éxito para ${name}!\n\nFecha: ${date} a las ${time}\nTe enviaremos una confirmación a ${email}.`);
+      alert(`¡Cita agendada con éxito para ${client?.name}!\n\nFecha: ${date} a las ${time}`);
 
       // Reset form after successful submit
       setServicesSelected([]);
       setDate("");
       setTime("");
-      setName("");
-      setEmail("");
-      setPhone("");
       setServiceUsers({});
 
     } catch (error) {
@@ -133,10 +129,38 @@ function BookingForm() {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  if (!client || !isAuthenticated) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+          <CalendarIcon className="w-16 h-16 text-primary-200 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Ingresa para Agendar</h2>
+          <p className="text-slate-600 mb-8 max-w-md mx-auto">
+            Para poder agendar una cita y ver tu historial, necesitas crear una cuenta o iniciar sesión.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              onClick={() => router.push("/signup")}
+              className="w-full sm:w-auto px-8 py-3 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-colors"
+            >
+              Crear Cuenta
+            </button>
+            <button
+              onClick={() => router.push("/login")}
+              className="w-full sm:w-auto px-8 py-3 bg-white text-primary-600 border-2 border-primary-600 rounded-full font-medium hover:bg-primary-50 transition-colors"
+            >
+              Iniciar Sesión
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -344,53 +368,7 @@ function BookingForm() {
                 </div>
               )}
 
-              <div className="space-y-4 pt-4">
-                <h3 className="text-xl font-bold text-secondary-900 border-b pb-2">5. Tus Datos</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-1">
-                      Nombre Completo <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Juan Pérez"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">
-                      Correo Electrónico <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="juan@ejemplo.com"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1">
-                      Teléfono <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      required
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="55 1234 5678"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    />
-                  </div>
-                </div>
-              </div>
+
 
               <div className="pt-6">
                 <button
