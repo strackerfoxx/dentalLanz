@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   description: "Clínica dental en Prado Coapa, CDMX. Especialistas en ortodoncia, blanqueamiento y tratamientos dentales integrales. Agenda tu cita hoy. Calificación 5.0 en Google.",
 };
 
+import { AuthProvider } from "@/context/AuthContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,7 +19,9 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body className={`${inter.className} bg-slate-50 text-slate-900 antialiased`}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
