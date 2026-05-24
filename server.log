@@ -5,12 +5,56 @@
 ▲ Next.js 16.2.6 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
-✓ Ready in 560ms
+✓ Ready in 511ms
 
-○ Compiling / ...
- GET / 200 in 6.1s (next.js: 5.1s, application-code: 931ms)
-API URL or Business ID missing, falling back to mock data for Services.
- GET /servicios 200 in 634ms (next.js: 497ms, application-code: 137ms)
- GET /agendar 200 in 596ms (next.js: 498ms, application-code: 98ms)
+○ Compiling /agendar ...
+ GET /agendar 200 in 6.5s (next.js: 5.9s, application-code: 601ms)
 [browser] API URL or Business ID missing, falling back to mock data for Services. (src/lib/api.ts:36:13)
 [browser] API URL or Business ID missing, falling back to mock data for Business. (src/lib/api.ts:9:13)
+ POST /undefined/appointment/availability/slots 404 in 945ms (next.js: 621ms, application-code: 324ms)
+ POST /undefined/appointment/availability/slots 404 in 1003ms (next.js: 758ms, application-code: 245ms)
+[browser] Error: Error fetching slots
+    at getAvailableSlots (src/lib/availableSlots.ts:43:13)
+    at async fetchSlots (src/components/Schedule.tsx:28:30)
+  41 |
+  42 |     if (!response.ok) {
+> 43 |       throw new Error("Error fetching slots");
+     |             ^
+  44 |     }
+  45 |
+  46 |     const validSlots = await response.json(); (src/lib/availableSlots.ts:49:13)
+[browser] Error: Error fetching slots
+    at getAvailableSlots (src/lib/availableSlots.ts:43:13)
+    at async fetchSlots (src/components/Schedule.tsx:28:30)
+  41 |
+  42 |     if (!response.ok) {
+> 43 |       throw new Error("Error fetching slots");
+     |             ^
+  44 |     }
+  45 |
+  46 |     const validSlots = await response.json(); (src/lib/availableSlots.ts:49:13)
+ GET /agendar 200 in 151ms (next.js: 10ms, application-code: 141ms)
+[browser] API URL or Business ID missing, falling back to mock data for Services. (src/lib/api.ts:36:13)
+[browser] API URL or Business ID missing, falling back to mock data for Business. (src/lib/api.ts:9:13)
+ POST /undefined/appointment/availability/slots 404 in 192ms (next.js: 25ms, application-code: 167ms)
+ POST /undefined/appointment/availability/slots 404 in 185ms (next.js: 92ms, application-code: 92ms)
+[browser] Error: Error fetching slots
+    at getAvailableSlots (src/lib/availableSlots.ts:43:13)
+    at async fetchSlots (src/components/Schedule.tsx:28:30)
+  41 |
+  42 |     if (!response.ok) {
+> 43 |       throw new Error("Error fetching slots");
+     |             ^
+  44 |     }
+  45 |
+  46 |     const validSlots = await response.json(); (src/lib/availableSlots.ts:49:13)
+[browser] Error: Error fetching slots
+    at getAvailableSlots (src/lib/availableSlots.ts:43:13)
+    at async fetchSlots (src/components/Schedule.tsx:28:30)
+  41 |
+  42 |     if (!response.ok) {
+> 43 |       throw new Error("Error fetching slots");
+     |             ^
+  44 |     }
+  45 |
+  46 |     const validSlots = await response.json(); (src/lib/availableSlots.ts:49:13)
