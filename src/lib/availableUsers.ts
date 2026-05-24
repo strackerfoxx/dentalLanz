@@ -5,9 +5,10 @@ interface GetAvailableUsersParams {
   date: string;
   hour: string;
   businessId: string;
+  token?: string;
 }
 
-export async function getAvailableUsers({ servicesSelected, date, hour, businessId }: GetAvailableUsersParams) {
+export async function getAvailableUsers({ servicesSelected, date, hour, businessId, token }: GetAvailableUsersParams) {
     if(!servicesSelected || servicesSelected.length === 0 || !date || !hour || !businessId) return {};
 
     const services = servicesSelected.map((serviceId: string) => ({ serviceId }));
@@ -23,7 +24,8 @@ export async function getAvailableUsers({ servicesSelected, date, hour, business
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/availability/users`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify(usersData)
         });

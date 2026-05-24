@@ -21,6 +21,7 @@ function EditBookingForm({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
 
   // Form State
+  const [status, setStatus] = useState<string>("");
   const [servicesSelected, setServicesSelected] = useState<string[]>([]);
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
@@ -29,6 +30,7 @@ function EditBookingForm({ id }: { id: string }) {
   const [serviceUsers, setServiceUsers] = useState<Record<string, string>>({});
   const [availableUsers, setAvailableUsers] = useState<Record<string, BusinessUser[]>>({});
 
+  console.log(id)
   useEffect(() => {
     async function fetchData() {
       if (!token) return;
@@ -37,27 +39,37 @@ function EditBookingForm({ id }: { id: string }) {
         const [servicesData, businessData, appointmentResponse] = await Promise.all([
           getServices(),
           getBusiness(),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/get-appointments-by-id`, {
-            method: "POST",
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/get-appointments-by-id?id=${id}`, {
+            method: "GET",
             headers: {
-              "Content-Type": "application/json",
               "Authorization": `Bearer ${token}`,
             },
-            body: JSON.stringify({ id }),
           }),
         ]);
 
+        console.log("Fetched services:", servicesData);
+        console.log("Fetched business:", businessData);
         setServices(servicesData.services);
         setBusiness(businessData);
 
         if (appointmentResponse.ok) {
           const appointmentData = await appointmentResponse.json();
-          setDate(appointmentData.date.split("T")[0]);
-          setTime(appointmentData.startTime);
+          console.log("Fetched appointment:", appointmentData.appointment);
+          setStatus(appointmentData.appointment.status ?? "");
+          setDate(appointmentData.appointment.date.split("T")[0]);
+          setTime(appointmentData.appointment.startTime);
 
-          if (appointmentData.services && Array.isArray(appointmentData.services)) {
-            const selectedIds = appointmentData.services.map((s: { serviceId: string }) => s.serviceId);
+          if (appointmentData.appointment.services && Array.isArray(appointmentData.appointment.services)) {
+            const selectedIds = appointmentData.appointment.services.map((s: { serviceId: string }) => s.serviceId);
             setServicesSelected(selectedIds);
+
+            const selectedUsers = appointmentData.appointment.services.reduce((acc: Record<string, string>, service: { serviceId: string; userId?: string }) => {
+              if (service.serviceId && service.userId) {
+                acc[service.serviceId] = service.userId;
+              }
+              return acc;
+            }, {});
+            setServiceUsers(selectedUsers);
           }
         } else {
           toast.error("Error al cargar la cita.");
@@ -84,6 +96,7 @@ function EditBookingForm({ id }: { id: string }) {
           date,
           hour: time,
           businessId: business.id,
+          token,
         });
         if (mounted) {
           setAvailableUsers(users);
@@ -106,6 +119,11 @@ function EditBookingForm({ id }: { id: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (status === "CANCELED") {
+      toast.error("La cita está cancelada y no se puede modificar.");
+      return;
+    }
+
     if (!date || servicesSelected.length === 0 || !time || !business?.id) {
       toast.error("Por favor completa todos los campos.");
       return;
@@ -120,23 +138,25 @@ function EditBookingForm({ id }: { id: string }) {
     }
 
     const payload = {
-      id,
       businessId: business.id,
       date: date.split("T")[0],
       startTime: time,
-      services: servicesSelected.map(serviceId => ({
-        serviceId,
-        userId: serviceUsers[serviceId],
-      })),
-      businessClientId: client?.businessClient
+      status: status || "SCHEDULED",
+      businessClientId: client?.businessClient,
+      appointmentId: id,
     };
 
     console.log("Edit payload:", payload);
 
     try {
-      // Endpoint to update was not explicitly provided but user said "crea la pantalla para editar la cita"
-      // We assume it's a PUT to /appointment/update or similar.
-      // Using toast as requested.
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/update`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
       toast.success(`Cita editada con éxito.`);
       router.push("/citas");
     } catch (error) {
@@ -203,13 +223,27 @@ function EditBookingForm({ id }: { id: string }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="text-center max-w-3xl mx-auto mb-12">
-        <h1 className="text-4xl font-extrabold text-secondary-900 tracking-tight">
-          Editar Cita
-        </h1>
-        <p className="mt-4 text-lg text-slate-500">
-          Modifica los detalles de tu cita y guarda los cambios.
-        </p>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-4xl font-extrabold text-secondary-900 tracking-tight">
+              Editar Cita
+            </h1>
+            <p className="mt-4 text-lg text-slate-500">
+              Modifica los detalles de tu cita y guarda los cambios.
+            </p>
+          </div>
+          {status && (
+            <div className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold ${status === "CANCELED" ? "bg-red-100 text-red-700" : "bg-emerald-100 text-emerald-700"}`}>
+              Estado: {status}
+            </div>
+          )}
+        </div>
       </div>
+      {status === "CANCELED" && (
+        <div className="max-w-3xl mx-auto mb-8 rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          Esta cita está cancelada y no se puede modificar. Solo puedes verla en modo de lectura.
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -258,10 +292,11 @@ function EditBookingForm({ id }: { id: string }) {
                       return (
                         <div
                           key={s.id}
-                          className={`flex items-start p-3 border rounded-xl cursor-pointer transition-colors ${
+                          className={`flex items-start p-3 border rounded-xl transition-colors ${
                             isSelected ? "border-primary-500 bg-primary-50" : "border-slate-200 bg-white hover:border-primary-300"
-                          }`}
+                          } ${status === "CANCELED" ? "cursor-not-allowed opacity-80" : "cursor-pointer"}`}
                           onClick={() => {
+                            if (status === "CANCELED") return;
                             if (isSelected) {
                               setServicesSelected(servicesSelected.filter(id => id !== s.id));
                             } else {
@@ -273,6 +308,7 @@ function EditBookingForm({ id }: { id: string }) {
                             <input
                               type="checkbox"
                               checked={isSelected}
+                              disabled={status === "CANCELED"}
                               onChange={() => {}} // handled by parent div click
                               className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                             />
@@ -309,40 +345,80 @@ function EditBookingForm({ id }: { id: string }) {
                         id="date"
                         required
                         value={date}
+                        disabled={status === "CANCELED"}
                         onChange={(e) => setDate(e.target.value)}
-                        className="pl-10 w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                        className="pl-10 w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:cursor-not-allowed disabled:bg-slate-100"
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
+              <div className="space-y-4 pt-4">
+                <h3 className="text-xl font-bold text-secondary-900 border-b pb-2">3. Estado de la cita</h3>
+                <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-slate-700 mb-2">
+                    Estado <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="status"
+                    value={status}
+                    disabled={status === "CANCELED"}
+                    onChange={(e) => setStatus(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
+                  >
+                    <option value="" disabled>-- Selecciona un estado --</option>
+                    <option value="SCHEDULED">SCHEDULED</option>
+                    <option value="CONFIRMED">CONFIRMED</option>
+                    <option value="CANCELED">CANCELED</option>
+                  </select>
+                </div>
+              </div>
+
               {date && servicesSelected.length > 0 && business && (
                 <div className="space-y-4 pt-4">
-                  <h3 className="text-xl font-bold text-secondary-900 border-b pb-2">3. Elige una Hora</h3>
+                  <h3 className="text-xl font-bold text-secondary-900 border-b pb-2">4. Elige una Hora</h3>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">
                       Horarios Disponibles <span className="text-red-500">*</span>
                     </label>
-                    <Schedule
-                      date={date}
-                      servicesSelected={servicesSelected}
-                      hour={time}
-                      setHour={setTime}
-                      business={business}
-                    />
-                    {!time && <p className="text-sm text-red-500 mt-2">Por favor selecciona una hora.</p>}
+                    {status === "CANCELED" ? (
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+                      <p className="font-semibold">Hora asignada</p>
+                      <p>{time || "No hay hora seleccionada"}</p>
+                    </div>
+                  ) : (
+                    <>
+                      <Schedule
+                        date={date}
+                        servicesSelected={servicesSelected}
+                        hour={time}
+                        setHour={setTime}
+                        business={business}
+                        excludeAppointmentId={id}
+                      />
+                      {!time && <p className="text-sm text-red-500 mt-2">Por favor selecciona una hora.</p>}
+                    </>
+                  )}
                   </div>
                 </div>
               )}
 
               {servicesSelected.length > 0 && time && date && (
                 <div className="space-y-4 pt-4">
-                  <h3 className="text-xl font-bold text-secondary-900 border-b pb-2">4. Asignar Profesionales</h3>
+                  <h3 className="text-xl font-bold text-secondary-900 border-b pb-2">5. Asignar Profesionales</h3>
                   <div className="space-y-4">
                     {servicesSelected.map((serviceId) => {
                       const service = services.find((s) => s.id === serviceId);
                       const availableUsersForService = availableUsers[serviceId] || [];
+                      const selectedUserId = serviceUsers[serviceId];
+                      const assignedUser = selectedUserId ? business?.users.find((u) => u.id === selectedUserId) : undefined;
+                      const finalAvailableUsers = selectedUserId
+                        ? [
+                            ...(assignedUser ? [assignedUser] : [{ id: selectedUserId, name: "Profesional asignado" }]),
+                            ...availableUsersForService.filter((u) => u.id !== selectedUserId),
+                          ]
+                        : availableUsersForService;
 
                       return (
                         <div key={serviceId} className="p-4 border rounded-xl bg-slate-50 border-slate-200">
@@ -350,13 +426,13 @@ function EditBookingForm({ id }: { id: string }) {
                             Profesional para {service?.name} <span className="text-red-500">*</span>
                           </label>
                           <select
-                            required
+                            disabled={status === "CANCELED"}
                             value={serviceUsers[serviceId] || ""}
                             onChange={(e) => updateServiceUser(serviceId, e.target.value)}
-                            className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white"
+                            className="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
                           >
                             <option value="" disabled>-- Seleccionar profesional --</option>
-                            {availableUsersForService.map((u) => (
+                            {finalAvailableUsers.map((u) => (
                               <option key={`${serviceId}-${u.id}`} value={u.id}>
                                 {u.name}
                               </option>
@@ -372,9 +448,10 @@ function EditBookingForm({ id }: { id: string }) {
               <div className="pt-6">
                 <button
                   type="submit"
-                  className="w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                  disabled={status === "CANCELED"}
+                  className={`w-full flex justify-center py-4 px-4 border border-transparent rounded-xl shadow-sm text-lg font-bold text-white ${status === "CANCELED" ? "bg-slate-400 cursor-not-allowed" : "bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"}`}
                 >
-                  Guardar Cambios
+                  {status === "CANCELED" ? "Cita Cancelada" : "Guardar Cambios"}
                 </button>
               </div>
 

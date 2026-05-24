@@ -157,7 +157,7 @@ export default function CitasPage() {
                           <Clock3 className="w-4 h-4" /> Agendada
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-slate-100 text-slate-800">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
                           {appointment.status}
                         </span>
                       )}

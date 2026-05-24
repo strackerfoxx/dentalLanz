@@ -10,9 +10,10 @@ interface ScheduleProps {
   setHour: (hour: string) => void;
   userId?: string;
   business: Business;
+  excludeAppointmentId?: string;
 }
 
-export default function Schedule({ date, servicesSelected, hour, setHour, userId, business }: ScheduleProps) {
+export default function Schedule({ date, servicesSelected, hour, setHour, userId, business, excludeAppointmentId = undefined }: ScheduleProps) {
   const [slots, setSlots] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -25,7 +26,7 @@ export default function Schedule({ date, servicesSelected, hour, setHour, userId
         return;
       }
       setIsLoading(true);
-      const availableSlots = await getAvailableSlots({ date, servicesSelected, business, userId });
+      const availableSlots = await getAvailableSlots({ date, servicesSelected, business, userId, excludeAppointmentId });
       if (mounted) {
         setSlots(availableSlots);
         setIsLoading(false);
@@ -36,7 +37,7 @@ export default function Schedule({ date, servicesSelected, hour, setHour, userId
     return () => {
       mounted = false;
     };
-  }, [servicesSelected, date, userId, business]);
+  }, [servicesSelected, date, userId, business, excludeAppointmentId]);
 
   if (!date || servicesSelected.length === 0) {
     return <div className="text-sm text-slate-500">Selecciona al menos un tratamiento y una fecha.</div>;
