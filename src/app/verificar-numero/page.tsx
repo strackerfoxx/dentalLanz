@@ -6,17 +6,27 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult
 } from "firebase/auth";
+import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, KeyRound, ShieldCheck } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function PhoneAuth() {
+  const router = useRouter();
+  const { login, isAuthenticated } = useAuth();
   const [phone, setPhone] = useState("+52");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -64,7 +74,7 @@ export default function PhoneAuth() {
       const user = result.user;
       const idToken = await user.getIdToken();
 
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/confirm-client`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/confirm-client`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -75,7 +85,16 @@ export default function PhoneAuth() {
         })
       });
 
-      alert("Número verificado");
+      if (!res.ok) {
+        throw new Error("No se pudo verificar el número.");
+      }
+
+      const data = await res.json();
+      if (data.token && data.client) {
+        login(data.token, data.client);
+      }
+
+      router.push("/");
     } catch (error) {
       console.error(error);
       alert("Código incorrecto o expirado.");

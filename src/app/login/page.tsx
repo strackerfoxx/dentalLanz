@@ -11,15 +11,23 @@ import { auth } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, KeyRound, LogIn } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Login() {
   const router = useRouter();
+  const { login, isAuthenticated } = useAuth();
   const [phone, setPhone] = useState("+52");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/");
+    }
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -82,6 +90,11 @@ export default function Login() {
 
       if (!res.ok) {
         throw new Error("Error en el inicio de sesión del lado del servidor.");
+      }
+
+      const data = await res.json();
+      if (data.token && data.client) {
+        login(data.token, data.client);
       }
 
       router.push("/");
