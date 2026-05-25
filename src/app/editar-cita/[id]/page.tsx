@@ -22,6 +22,7 @@ function EditBookingForm({ id }: { id: string }) {
 
   // Form State
   const [status, setStatus] = useState<string>("");
+  const [statusSelected, setStatusSelected] = useState<string>("");
   const [servicesSelected, setServicesSelected] = useState<string[]>([]);
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
@@ -96,7 +97,7 @@ function EditBookingForm({ id }: { id: string }) {
           date,
           hour: time,
           businessId: business.id,
-          token,
+          token: token || undefined,
         });
         if (mounted) {
           setAvailableUsers(users);
@@ -107,7 +108,7 @@ function EditBookingForm({ id }: { id: string }) {
     return () => {
       mounted = false;
     };
-  }, [servicesSelected, time, date, business]);
+  }, [servicesSelected, time, date, business, token]);
 
   const updateServiceUser = (serviceId: string, userId: string) => {
     setServiceUsers((prev) => ({
@@ -141,7 +142,11 @@ function EditBookingForm({ id }: { id: string }) {
       businessId: business.id,
       date: date.split("T")[0],
       startTime: time,
-      status: status || "SCHEDULED",
+      status: statusSelected || "SCHEDULED",
+      services: servicesSelected.map(serviceId => ({
+        serviceId,
+        // userId: serviceUsers[serviceId],
+      })),
       businessClientId: client?.businessClient,
       appointmentId: id,
     };
@@ -362,14 +367,13 @@ function EditBookingForm({ id }: { id: string }) {
                   </label>
                   <select
                     id="status"
-                    value={status}
+                    value={statusSelected}
                     disabled={status === "CANCELED"}
-                    onChange={(e) => setStatus(e.target.value)}
+                    onChange={(e) => setStatusSelected(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white disabled:cursor-not-allowed disabled:bg-slate-100"
                   >
                     <option value="" disabled>-- Selecciona un estado --</option>
                     <option value="SCHEDULED">SCHEDULED</option>
-                    <option value="CONFIRMED">CONFIRMED</option>
                     <option value="CANCELED">CANCELED</option>
                   </select>
                 </div>
