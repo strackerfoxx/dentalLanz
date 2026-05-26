@@ -7,11 +7,14 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, KeyRound, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+
+import { toast } from "react-toastify";
 
 export default function Login() {
   const router = useRouter();
@@ -20,6 +23,7 @@ export default function Login() {
   const [code, setCode] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,80 +33,132 @@ export default function Login() {
     }
   }, [isAuthenticated, router]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const win = window as typeof window & { recaptchaVerifier?: RecaptchaVerifier };
-      if (!win.recaptchaVerifier) {
-        win.recaptchaVerifier = new RecaptchaVerifier(
-          auth,
-          "recaptcha-container",
-          {
-            size: "normal"
-          }
-        );
+  // const createRecaptchaVerifier = async () => {
+  //   if (typeof window === "undefined") return null;
 
-        win.recaptchaVerifier.render();
-      }
-    }
-  }, []);
+  //   const win = window as typeof window & { recaptchaVerifier?: RecaptchaVerifier };
+  //   if (win.recaptchaVerifier) {
+  //     try {
+  //       win.recaptchaVerifier.clear();
+  //     } catch (error) {
+  //       console.warn("No se pudo limpiar el reCAPTCHA anterior:", error);
+  //     }
+  //     win.recaptchaVerifier = undefined;
+  //   }
 
-  async function sendCode() {
+  //   const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+  //     size: "normal"
+  //   });
+
+  //   await verifier.render();
+  //   win.recaptchaVerifier = verifier;
+  //   setRecaptchaVerifier(verifier);
+  //   return verifier;
+  // };
+
+  // useEffect(() => {
+  //   createRecaptchaVerifier();
+  // }, []);
+
+  // async function sendCode() {
+  //   try {
+  //     setIsLoading(true);
+  //     setError("");
+  //     const verifier = recaptchaVerifier ?? (await createRecaptchaVerifier());
+  //     if (!verifier) {
+  //       throw new Error("El reCAPTCHA no se cargó correctamente. Recarga la página e intenta nuevamente.");
+  //     }
+
+  //     const result = await signInWithPhoneNumber(
+  //       auth,
+  //       phone,
+  //       verifier
+  //     );
+
+  //     setConfirmationResult(result);
+  //     setStep(2);
+  //   } catch (error: unknown) {
+  //     console.error(error);
+  //     if (error instanceof FirebaseError && error.code === "auth/invalid-app-credential") {
+  //       await createRecaptchaVerifier();
+  //     }
+  //     setError(error instanceof Error ? error.message : "Hubo un error al enviar el código. Intenta nuevamente.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  // async function verifyCode() {
+  //   if (!confirmationResult) return;
+  //   try {
+  //     setIsLoading(true);
+  //     setError("");
+
+  //     const result = await confirmationResult.confirm(code);
+  //     const user = result.user;
+  //     const idToken = await user.getIdToken();
+
+  //     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
+  //     const res = await fetch(`${apiUrl}/client/login`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify({
+  //         idToken
+  //       })
+  //     });
+
+  //     if (!res.ok) {
+  //       throw new Error("Error en el inicio de sesión del lado del servidor.");
+  //     }
+
+  //     const data = await res.json();
+  //     if (data.token && data.client) {
+  //       login(data.token, data.client);
+  //     }
+
+  //     router.push("/");
+  //   } catch (error: unknown) {
+  //     console.error(error);
+  //     setError(error instanceof Error ? error.message : "Código incorrecto o expirado.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  async function loginFunction() {
     try {
-      setIsLoading(true);
-      setError("");
-      const win = window as typeof window & { recaptchaVerifier?: RecaptchaVerifier };
-      const result = await signInWithPhoneNumber(
-        auth,
-        phone,
-        win.recaptchaVerifier!
-      );
-
-      setConfirmationResult(result);
-      setStep(2);
-    } catch (error: unknown) {
-      console.error(error);
-      setError(error instanceof Error ? error.message : "Hubo un error al enviar el código. Intenta nuevamente.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function verifyCode() {
-    if (!confirmationResult) return;
-    try {
-      setIsLoading(true);
-      setError("");
-
-      const result = await confirmationResult.confirm(code);
-      const user = result.user;
-      const idToken = await user.getIdToken();
-
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "/api";
-      const res = await fetch(`${apiUrl}/client/login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          idToken
+          phone
         })
       });
-
-      if (!res.ok) {
-        throw new Error("Error en el inicio de sesión del lado del servidor.");
-      }
+      console.log("Login response:", res);
 
       const data = await res.json();
       if (data.token && data.client) {
         login(data.token, data.client);
       }
-
-      router.push("/");
-    } catch (error: unknown) {
+      if(res.status === 404) {
+        toast.error("Cliente no encontrado");
+        return;
+      }
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Error en el inicio de sesión.");
+      }
+      toast.success(`Sesion iniciada con éxito.`);
+      setTimeout(() => {
+        router.push("/");
+      }, 1000);
+    }catch (error) {
       console.error(error);
-      setError(error instanceof Error ? error.message : "Código incorrecto o expirado.");
-    } finally {
-      setIsLoading(false);
+      toast.error("Error al iniciar sesión. Por favor, intenta de nuevo.");
     }
   }
 
@@ -134,7 +190,6 @@ export default function Login() {
               </div>
             )}
 
-            {step === 1 ? (
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
                   Número de Teléfono
@@ -158,55 +213,13 @@ export default function Login() {
                 </div>
 
                 <button
-                  onClick={sendCode}
+                  onClick={loginFunction}
                   disabled={isLoading || !phone}
                   className="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  {isLoading ? "Enviando..." : "Enviar código"}
+                  {isLoading ? "Iniciando..." : "Iniciar Sesión"}
                 </button>
               </div>
-            ) : (
-              <div>
-                <label htmlFor="code" className="block text-sm font-medium text-slate-700 mb-2">
-                  Código de Verificación
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <KeyRound className="h-5 w-5 text-slate-400" />
-                  </div>
-                  <input
-                    id="code"
-                    type="text"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    placeholder="123456"
-                    className="block w-full pl-10 pr-3 py-3 border border-slate-300 rounded-xl focus:ring-primary-500 focus:border-primary-500 text-slate-900 sm:text-sm tracking-widest text-center transition-colors"
-                    maxLength={6}
-                  />
-                </div>
-
-                <button
-                  onClick={verifyCode}
-                  disabled={isLoading || code.length < 6}
-                  className="mt-6 w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
-                </button>
-
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={() => {
-                      setStep(1);
-                      setCode("");
-                      setError("");
-                    }}
-                    className="text-sm font-medium text-primary-600 hover:text-primary-500 transition-colors"
-                  >
-                    Usar otro número
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>

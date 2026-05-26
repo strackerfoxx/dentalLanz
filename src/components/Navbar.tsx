@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, X, Phone } from "lucide-react";
+import { Menu, X, Phone, Calendar } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -25,14 +25,19 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <Link href="/servicios" className="text-secondary-800 hover:text-primary-600 transition-colors">Servicios</Link>
             <Link href="/#opiniones" className="text-secondary-800 hover:text-primary-600 transition-colors">Opiniones</Link>
-            {isAuthenticated && (
+            {isAuthenticated ? (
               <Link href="/citas" className="text-secondary-800 hover:text-primary-600 transition-colors">Mis Citas</Link>
+            ): (
+              <div className="flex items-center gap-4">
+                <Link href="/login" className="text-secondary-800 hover:text-primary-600 transition-colors">Iniciar Sesión</Link>
+                <Link href="/signup" className="text-secondary-800 hover:text-primary-600 transition-colors">Registrarse</Link>
+              </div>
             )}
             <Link
               href="/agendar"
               className="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary-600 text-white rounded-full font-medium hover:bg-primary-700 transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
             >
-              <Phone className="w-4 h-4" />
+              <Calendar className="w-4 h-4" />
               Agendar Cita
             </Link>
           </div>

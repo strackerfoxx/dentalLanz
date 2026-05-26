@@ -6,13 +6,13 @@ import {
   signInWithPhoneNumber,
   ConfirmationResult
 } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Phone, KeyRound, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { toast } from "react-toastify";
 
 export default function PhoneAuth() {
   const router = useRouter();
@@ -21,6 +21,7 @@ export default function PhoneAuth() {
   const [code, setCode] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -29,80 +30,100 @@ export default function PhoneAuth() {
     }
   }, [isAuthenticated, router]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const win = window as typeof window & { recaptchaVerifier?: RecaptchaVerifier };
-      if (!win.recaptchaVerifier) {
-        win.recaptchaVerifier = new RecaptchaVerifier(
-          auth,
-          "recaptcha-container",
-          {
-            size: "normal"
-          }
-        );
+  // const createRecaptchaVerifier = async () => {
+  //   if (typeof window === "undefined") return null;
 
-        win.recaptchaVerifier.render();
-      }
-    }
-  }, []);
+  //   const win = window as typeof window & { recaptchaVerifier?: RecaptchaVerifier };
+  //   if (win.recaptchaVerifier) {
+  //     try {
+  //       win.recaptchaVerifier.clear();
+  //     } catch (error) {
+  //       console.warn("No se pudo limpiar el reCAPTCHA anterior:", error);
+  //     }
+  //     win.recaptchaVerifier = undefined;
+  //   }
 
-  async function sendCode() {
-    try {
-      setIsLoading(true);
-      const win = window as typeof window & { recaptchaVerifier?: RecaptchaVerifier };
-      const result = await signInWithPhoneNumber(
-        auth,
-        phone,
-        win.recaptchaVerifier!
-      );
+  //   const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+  //     size: "normal"
+  //   });
 
-      setConfirmationResult(result);
-      setStep(2);
-      toast.success("Código enviado");
-    } catch (error) {
-      console.error(error);
-      toast.error("Hubo un error al enviar el código. Intenta nuevamente.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  //   await verifier.render();
+  //   win.recaptchaVerifier = verifier;
+  //   setRecaptchaVerifier(verifier);
+  //   return verifier;
+  // };
 
-  async function verifyCode() {
-    if (!confirmationResult) return;
-    try {
-      setIsLoading(true);
-      const result = await confirmationResult.confirm(code);
-      const user = result.user;
-      const idToken = await user.getIdToken();
+  // useEffect(() => {
+  //   createRecaptchaVerifier();
+  // }, []);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/confirm-client`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          phone,
-          idToken
-        })
-      });
+  // async function sendCode() {
+  //   try {
+  //     setIsLoading(true);
+  //     const verifier = recaptchaVerifier ?? (await createRecaptchaVerifier());
+  //     if (!verifier) {
+  //       throw new Error("El reCAPTCHA no se cargó correctamente. Recarga la página e intenta nuevamente.");
+  //     }
 
-      if (!res.ok) {
-        throw new Error("No se pudo verificar el número.");
-      }
+  //     const result = await signInWithPhoneNumber(
+  //       auth,
+  //       phone,
+  //       verifier
+  //     );
 
-      const data = await res.json();
-      if (data.token && data.client) {
-        login(data.token, data.client);
-      }
+  //     setConfirmationResult(result);
+  //     setStep(2);
+  //     alert("Código enviado");
+  //   } catch (error: unknown) {
+  //     console.error(error);
+  //     if (error instanceof FirebaseError && error.code === "auth/invalid-app-credential") {
+  //       await createRecaptchaVerifier();
+  //     }
+  //     alert(error instanceof Error ? error.message : "Hubo un error al enviar el código. Intenta nuevamente.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
-      router.push("/");
-    } catch (error) {
-      console.error(error);
-      toast.error("Código incorrecto o expirado.");
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // async function verifyCode() {
+  //   if (!confirmationResult) return;
+  //   try {
+  //     setIsLoading(true);
+  //     const result = await confirmationResult.confirm(code);
+  //     const user = result.user;
+  //     const idToken = await user.getIdToken();
+  //     console.log("ID Token:", idToken);
+
+  //     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/client/confirm-client`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json"
+  //       },
+  //       body: JSON.stringify({
+  //         phone,
+  //         idToken
+  //       })
+  //     });
+
+  //     if (!res.ok) {
+  //       throw new Error("No se pudo verificar el número.");
+  //     }
+
+  //     const data = await res.json();
+  //     if (data.token && data.client) {
+  //       login(data.token, data.client);
+  //     }
+
+  //     router.push("/");
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Código incorrecto o expirado.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
+  
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -115,7 +136,7 @@ export default function PhoneAuth() {
               <ShieldCheck className="w-8 h-8" />
             </div>
             <h2 className="text-3xl font-extrabold text-secondary-900">
-              {step === 1 ? "Iniciar Sesión" : "Verificar Número"}
+              Verificar Número
             </h2>
             <p className="mt-2 text-sm text-slate-500">
               {step === 1

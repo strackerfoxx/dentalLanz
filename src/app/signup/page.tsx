@@ -51,12 +51,16 @@ export default function CrearCliente() {
         }),
       });
 
-      if (!res.ok) {
+      
+      if (res.status === 409) {
+        throw new Error("Número de teléfono ya registrado.");
+      }
+      if (!res.ok && res.status !== 409) {
         throw new Error("No se pudo crear el cliente.");
       }
 
       // Redirigir a la pantalla de login para verificar el número
-      router.push("/verificar-numero");
+      router.push("/login");
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message || "Ocurrió un error inesperado.");

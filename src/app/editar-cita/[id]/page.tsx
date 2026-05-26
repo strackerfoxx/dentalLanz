@@ -151,8 +151,6 @@ function EditBookingForm({ id }: { id: string }) {
       appointmentId: id,
     };
 
-    console.log("Edit payload:", payload);
-
     try {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/update`, {
           method: "PUT",

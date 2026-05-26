@@ -119,13 +119,18 @@ function BookingForm() {
       }
 
       toast.success(`¡Cita agendada con éxito para ${client?.name}!\n\nFecha: ${date} a las ${time}`);
+      
+      setTimeout(() => {
+        router.push("/citas");
+        // Reset form after successful submit
+        setServicesSelected([]);
+        setDate("");
+        setTime("");
+        setServiceUsers({});
 
-      // Reset form after successful submit
-      setServicesSelected([]);
-      setDate("");
-      setTime("");
-      setServiceUsers({});
-
+      }, 1000);
+      
+      
     } catch (error) {
       console.error(error);
       toast.error("Ocurrió un error al intentar agendar tu cita. Por favor intenta de nuevo.");
