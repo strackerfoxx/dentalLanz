@@ -101,7 +101,6 @@ function BookingForm() {
       })),
       businessClientId: client?.businessClient
     };
-    console.log("Payload to submit:", payload);
 
     try {
       // Usar endpoint de creación de citas adaptado al cliente

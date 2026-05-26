@@ -138,7 +138,6 @@ export default function Login() {
           phone
         })
       });
-      console.log("Login response:", res);
 
       const data = await res.json();
       if (data.token && data.client) {

@@ -15,7 +15,6 @@ export async function getBusiness(): Promise<Business> {
       // Revalidate every hour, or adjust as needed. Using Next.js fetch cache.
       next: { revalidate: 3600 },
     });
-    console.log(`Fetching business data from: ${apiUrl}/business/get-business-by-id-client?businessId=${businessId}`);
 
     if (!res.ok) {
       throw new Error("Failed to fetch business data");

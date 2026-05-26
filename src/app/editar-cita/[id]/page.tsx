@@ -31,7 +31,6 @@ function EditBookingForm({ id }: { id: string }) {
   const [serviceUsers, setServiceUsers] = useState<Record<string, string>>({});
   const [availableUsers, setAvailableUsers] = useState<Record<string, BusinessUser[]>>({});
 
-  console.log(id)
   useEffect(() => {
     async function fetchData() {
       if (!token) return;
@@ -48,14 +47,11 @@ function EditBookingForm({ id }: { id: string }) {
           }),
         ]);
 
-        console.log("Fetched services:", servicesData);
-        console.log("Fetched business:", businessData);
         setServices(servicesData.services);
         setBusiness(businessData);
 
         if (appointmentResponse.ok) {
           const appointmentData = await appointmentResponse.json();
-          console.log("Fetched appointment:", appointmentData.appointment);
           setStatus(appointmentData.appointment.status ?? "");
           setDate(appointmentData.appointment.date.split("T")[0]);
           setTime(appointmentData.appointment.startTime);
