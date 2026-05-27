@@ -79,21 +79,8 @@ export default function Navbar() {
             >
               Contacto
             </Link>
-            <Link
-              href="/signup"
-              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
-              onClick={() => setIsOpen(false)}
-            >
-              Registrarse
-            </Link>
-            <Link
-              href="/login"
-              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
-              onClick={() => setIsOpen(false)}
-            >
-              Iniciar Sesión
-            </Link>
-            {isAuthenticated && (
+            
+            {isAuthenticated ? (
               <Link
                 href="/citas"
                 className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
@@ -101,13 +88,30 @@ export default function Navbar() {
               >
                 Mis Citas
               </Link>
+            ) : (
+              <>
+                  <Link
+                    href="/signup"
+                    className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Registrarse
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Iniciar Sesión
+                  </Link>
+              </>
             )}
             <div className="pt-4 px-3">
               <Link
                 href="/agendar"
                 className="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 text-white rounded-xl font-medium hover:bg-primary-700 transition-colors shadow-md"
               >
-                <Phone className="w-5 h-5" />
+                <Calendar className="w-4 h-4" />
                 Agendar Cita
               </Link>
             </div>
