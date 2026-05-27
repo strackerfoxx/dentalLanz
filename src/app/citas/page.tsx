@@ -133,7 +133,7 @@ export default function CitasPage() {
                       <div>
                         <p className="text-lg font-semibold text-slate-900">
                           {new Date(
-                            appointment.date + "T00:00:00"
+                            appointment.date?.split("T")[0] + "T00:00:00"
                           ).toLocaleDateString("es-MX", {
                             weekday: "long",
                             year: "numeric",
