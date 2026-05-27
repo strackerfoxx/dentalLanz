@@ -79,6 +79,20 @@ export default function Navbar() {
             >
               Contacto
             </Link>
+            <Link
+              href="/signup"
+              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Registrarse
+            </Link>
+            <Link
+              href="/login"
+              className="block px-3 py-3 text-base font-medium text-secondary-800 hover:text-primary-600 hover:bg-slate-50 rounded-md"
+              onClick={() => setIsOpen(false)}
+            >
+              Iniciar Sesión
+            </Link>
             {isAuthenticated && (
               <Link
                 href="/citas"
