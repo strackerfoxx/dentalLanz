@@ -94,7 +94,7 @@ function BookingForm() {
 
     const payload = {
       businessId: business.id,
-      date: DateTime.fromJSDate(date).toISODate(),
+      date: DateTime.fromJSDate(new Date(date)).toISODate(),
       startTime: time,
       services: servicesSelected.map(serviceId => ({
         serviceId,
