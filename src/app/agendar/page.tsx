@@ -11,6 +11,7 @@ import { MapPin, Phone, Calendar as CalendarIcon, Clock, Mail } from "lucide-rea
 import Schedule from "@/components/Schedule";
 import { getAvailableUsers } from "@/lib/availableUsers";
 import { toast } from "react-toastify";
+import { DateTime } from "luxon"
 
 function BookingForm() {
   const searchParams = useSearchParams();
@@ -93,13 +94,14 @@ function BookingForm() {
 
     const payload = {
       businessId: business.id,
-      date: date.split("T")[0],
+      date: DateTime.fromJSDate(date).toISODate(),
       startTime: time,
       services: servicesSelected.map(serviceId => ({
         serviceId,
         userId: serviceUsers[serviceId],
       })),
-      businessClientId: client?.businessClient
+      businessClientId: client?.businessClient,
+      timezone: DateTime.local().zoneName,
     };
 
     try {

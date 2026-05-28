@@ -11,6 +11,7 @@ import { MapPin, Phone, Calendar as CalendarIcon, Clock, Mail } from "lucide-rea
 import Schedule from "@/components/Schedule";
 import { getAvailableUsers } from "@/lib/availableUsers";
 import { toast } from "react-toastify";
+import { DateTime } from "luxon";
 
 function EditBookingForm({ id }: { id: string }) {
   const router = useRouter();
@@ -53,7 +54,7 @@ function EditBookingForm({ id }: { id: string }) {
         if (appointmentResponse.ok) {
           const appointmentData = await appointmentResponse.json();
           setStatus(appointmentData.appointment.status ?? "");
-          setDate(appointmentData.appointment.date.split("T")[0]);
+          setDate(new Date(appointmentData.appointment.date).toISOString().split("T")[0]);
           setTime(appointmentData.appointment.startTime);
 
           if (appointmentData.appointment.services && Array.isArray(appointmentData.appointment.services)) {
@@ -134,18 +135,23 @@ function EditBookingForm({ id }: { id: string }) {
       }
     }
 
+    const dateObj = new Date(date);
+
     const payload = {
       businessId: business.id,
-      date: date.split("T")[0],
+      date: DateTime.fromJSDate(dateObj, { zone: 'utc' }).toFormat('yyyy-MM-dd'),
       startTime: time,
       status: statusSelected || "SCHEDULED",
       services: servicesSelected.map(serviceId => ({
         serviceId,
-        // userId: serviceUsers[serviceId],
+        userId: serviceUsers[serviceId],
       })),
       businessClientId: client?.businessClient,
       appointmentId: id,
+      timezone: DateTime.local().zoneName,
     };
+
+    console.log("Payload to submit:", payload);
 
     try {
         await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/update`, {

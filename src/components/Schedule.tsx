@@ -54,7 +54,7 @@ export default function Schedule({ date, servicesSelected, hour, setHour, userId
            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
         </div>
       ) : (
-        slots.map((time) => (
+        slots?.map((time) => (
           <button
             key={time}
             onClick={(e) => {

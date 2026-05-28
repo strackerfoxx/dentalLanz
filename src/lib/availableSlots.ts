@@ -1,4 +1,5 @@
 import { Business } from "./types";
+import { DateTime } from "luxon";
 
 interface GetAvailableSlotsParams {
   date: string;
@@ -26,9 +27,13 @@ export async function getAvailableSlots({ date, servicesSelected, business, user
   const data = {
     businessId: business.id,
     services,
-    date: date.split('T')[0],
-    excludeAppointmentId
+    date: DateTime.fromJSDate(new Date(date), { zone: 'utc' }).toFormat('yyyy-MM-dd'),
+    excludeAppointmentId,
+    currentTime: DateTime.now().toISO(),
+    timezone: DateTime.local().zoneName
   }
+
+  console.log("Requesting available slots with data:", data);
 
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/appointment/availability/slots`, {
@@ -39,12 +44,16 @@ export async function getAvailableSlots({ date, servicesSelected, business, user
       body: JSON.stringify(data)
     });
 
+
+
     if (!response.ok) {
       throw new Error("Error fetching slots");
     }
 
     const validSlots = await response.json();
+    console.log("Received available slots:", validSlots);
     return validSlots;
+
   } catch(error) {
     console.error(error);
     return [];
